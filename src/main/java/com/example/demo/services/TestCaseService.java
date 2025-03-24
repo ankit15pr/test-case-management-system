@@ -1,13 +1,17 @@
 package com.example.demo.services;
 
-import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.Repository.TestCaseRepository;
 import com.example.demo.model.TestCase;
+import com.example.demo.model.Status;
+import com.example.demo.model.Priority;
 
 @Service
 public class TestCaseService {
@@ -15,8 +19,19 @@ public class TestCaseService {
     @Autowired
     private TestCaseRepository repository;
 
-    public List<TestCase> getAllTestCases() {
-        return repository.findAll();
+    // ✅ Pagination & Filtering for GET /api/testcases
+    public Page<TestCase> getAllTestCases(Status status, Priority priority, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        
+        if (status != null && priority != null) {
+            return repository.findByStatusAndPriority(status, priority, pageable);
+        } else if (status != null) {
+            return repository.findByStatus(status, pageable);
+        } else if (priority != null) {
+            return repository.findByPriority(priority, pageable);
+        }
+        
+        return repository.findAll(pageable);
     }
 
     public Optional<TestCase> getTestCaseById(String id) {
