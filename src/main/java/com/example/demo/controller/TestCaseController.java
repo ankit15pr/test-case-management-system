@@ -1,22 +1,14 @@
 package com.example.demo.controller;
 
-import java.util.List;
-import java.util.Optional;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.example.demo.model.TestCase;
+import com.example.demo.model.Status;
+import com.example.demo.model.Priority;
 import com.example.demo.services.TestCaseService;
-
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
-
+import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/testcases")
@@ -24,29 +16,45 @@ public class TestCaseController {
     
     @Autowired
     private TestCaseService service;
-    
+
+    // ✅ Get all test cases (with pagination & filtering)
     @GetMapping
-    public List<TestCase> getAllTestCases() {
-        return service.getAllTestCases();
+    public ResponseEntity<Page<TestCase>> getAllTestCases(
+            @RequestParam(required = false) Status status,
+            @RequestParam(required = false) Priority priority,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return ResponseEntity.ok(service.getAllTestCases(status, priority, page, size));
     }
 
+    // ✅ Get test case by ID (Returns 404 if not found)
     @GetMapping("/{id}")
-    public Optional<TestCase> getTestCaseById(@PathVariable String id){
-        return service.getTestCaseById(id);
+    public ResponseEntity<TestCase> getTestCaseById(@PathVariable String id) {
+        return ResponseEntity.ok(service.getTestCaseById(id));
     }
 
+    // ✅ Create a new test case (Factory Pattern)
     @PostMapping
-    public TestCase createTestCase(@RequestBody TestCase testCase) {
-        return service.createTestCase(testCase);
+    public ResponseEntity<TestCase> createTestCase(
+            @Valid @RequestParam String title,
+            @RequestParam(required = false) String description,
+            @RequestParam Status status,
+            @RequestParam Priority priority) {
+        
+        TestCase newTestCase = service.createTestCase(title, description, status, priority);
+        return ResponseEntity.status(201).body(newTestCase);
     }
 
+    // ✅ Update an existing test case (Returns 404 if not found)
     @PutMapping("/{id}")
-    public TestCase updateTestCase(@PathVariable String id, @RequestBody TestCase testCase){
-        return service.updateTestCase(id, testCase);
+    public ResponseEntity<TestCase> updateTestCase(@PathVariable String id, @Valid @RequestBody TestCase testCase) {
+        return ResponseEntity.ok(service.updateTestCase(id, testCase));
     }
 
+    // ✅ Delete a test case (Returns 404 if not found)
     @DeleteMapping("/{id}")
-    public void deleteTestCase(@PathVariable String id){
+    public ResponseEntity<String> deleteTestCase(@PathVariable String id) {
         service.deleteTestCase(id);
+        return ResponseEntity.ok("Test case deleted successfully");
     }
 }
