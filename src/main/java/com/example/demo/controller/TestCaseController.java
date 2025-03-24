@@ -1,22 +1,15 @@
 package com.example.demo.controller;
 
-import java.util.List;
-import java.util.Optional;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.data.domain.Page;
+import org.springframework.web.bind.annotation.*;
 
 import com.example.demo.model.TestCase;
+import com.example.demo.model.Status;
+import com.example.demo.model.Priority;
 import com.example.demo.services.TestCaseService;
 
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
-
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/testcases")
@@ -24,27 +17,36 @@ public class TestCaseController {
     
     @Autowired
     private TestCaseService service;
-    
+
+    // ✅ Get all test cases with pagination & filtering
     @GetMapping
-    public List<TestCase> getAllTestCases() {
-        return service.getAllTestCases();
+    public Page<TestCase> getAllTestCases(
+            @RequestParam(required = false) Status status,
+            @RequestParam(required = false) Priority priority,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return service.getAllTestCases(status, priority, page, size);
     }
 
+    // ✅ Get test case by ID
     @GetMapping("/{id}")
     public Optional<TestCase> getTestCaseById(@PathVariable String id){
         return service.getTestCaseById(id);
     }
 
+    // ✅ Create a new test case
     @PostMapping
     public TestCase createTestCase(@RequestBody TestCase testCase) {
         return service.createTestCase(testCase);
     }
 
+    // ✅ Update an existing test case
     @PutMapping("/{id}")
     public TestCase updateTestCase(@PathVariable String id, @RequestBody TestCase testCase){
         return service.updateTestCase(id, testCase);
     }
 
+    // ✅ Delete a test case
     @DeleteMapping("/{id}")
     public void deleteTestCase(@PathVariable String id){
         service.deleteTestCase(id);
