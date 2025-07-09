@@ -46,16 +46,41 @@ public class TestCaseService {
     }
 
     // ✅ Update test case (Exception Handling)
+    // public TestCase updateTestCase(String id, TestCase updatedTestCase) {
+    //     return repository.findById(id).map(existing -> {
+    //         existing.setTitle(updatedTestCase.getTitle());
+    //         existing.setDescription(updatedTestCase.getDescription());
+    //         existing.setStatus(updatedTestCase.getStatus());
+    //         existing.setPriority(updatedTestCase.getPriority());
+    //         existing.setUpdatedAt(new java.util.Date());
+    //         return repository.save(existing);
+    //     }).orElseThrow(() -> new ResourceNotFoundException("Test case not found with ID: " + id));
+    // }
     public TestCase updateTestCase(String id, TestCase updatedTestCase) {
-        return repository.findById(id).map(existing -> {
+    return repository.findById(id).map(existing -> {
+
+        if (updatedTestCase.getTitle() != null) {
             existing.setTitle(updatedTestCase.getTitle());
+        }
+
+        if (updatedTestCase.getDescription() != null) {
             existing.setDescription(updatedTestCase.getDescription());
+        }
+
+        if (updatedTestCase.getStatus() != null) {
             existing.setStatus(updatedTestCase.getStatus());
+        }
+
+        if (updatedTestCase.getPriority() != null) {
             existing.setPriority(updatedTestCase.getPriority());
-            existing.setUpdatedAt(new java.util.Date());
-            return repository.save(existing);
-        }).orElseThrow(() -> new ResourceNotFoundException("Test case not found with ID: " + id));
-    }
+        }
+
+        existing.setUpdatedAt(new java.util.Date());
+
+        return repository.save(existing);
+    }).orElseThrow(() -> new ResourceNotFoundException("Test case not found with ID: " + id));
+}
+
 
     // ✅ Delete test case (Exception Handling)
     public void deleteTestCase(String id) {

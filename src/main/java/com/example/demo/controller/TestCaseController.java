@@ -13,15 +13,17 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Date;
+
 @Tag(name = "Test Case Management", description = "CRUD operations for test cases")
 @RestController
 @RequestMapping("/api/testcases")
 public class TestCaseController {
-    
+
     @Autowired
     private TestCaseService service;
 
-    @Operation(summary = "Get all test cases", description = "Retrieve a paginated list of test case with optional filtering by status and priority")
+    @Operation(summary = "Get all test cases", description = "Retrieve a paginated list of test cases with optional filtering by status and priority")
     @GetMapping
     public ResponseEntity<Page<TestCase>> getAllTestCases(
             @RequestParam(required = false) Status status,
@@ -37,25 +39,26 @@ public class TestCaseController {
         return ResponseEntity.ok(service.getTestCaseById(id));
     }
 
-    @Operation(summary = "Create a new test case", description = "Create a test case using title, description, status, and priority")
+    @Operation(summary = "Create a new test case", description = "Create a test case using JSON body")
     @PostMapping
-    public ResponseEntity<TestCase> createTestCase(
-            @Valid @RequestParam String title,
-            @RequestParam(required = false) String description,
-            @RequestParam Status status,
-            @RequestParam Priority priority) {
-        
-        TestCase newTestCase = service.createTestCase(title, description, status, priority);
+    public ResponseEntity<TestCase> createTestCase(@Valid @RequestBody TestCase request) {
+        request.setCreatedAt(new Date());
+        request.setUpdatedAt(new Date());
+        TestCase newTestCase = service.createTestCase(
+                request.getTitle(),
+                request.getDescription(),
+                request.getStatus(),
+                request.getPriority());
         return ResponseEntity.status(201).body(newTestCase);
     }
 
-    @Operation(summary = "Update an existing test case", description = "Modify an existing test case using its ID")
-    @PutMapping("/{id}")
-    public ResponseEntity<TestCase> updateTestCase(@PathVariable String id, @Valid @RequestBody TestCase testCase) {
-        return ResponseEntity.ok(service.updateTestCase(id, testCase));
+    @Operation(summary = "Update a test case", description = "Update a test case using its ID and new JSON body")
+    @PatchMapping("/{id}")
+    public ResponseEntity<TestCase> patchTestCase(@PathVariable String id, @RequestBody TestCase request) {
+        return ResponseEntity.ok(service.updateTestCase(id, request));
     }
 
-    @Operation(summary = "Delete a test case", description = "Remove a test case using its ID")
+    @Operation(summary = "Delete a test case", description = "Delete a test case by its ID")
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteTestCase(@PathVariable String id) {
         service.deleteTestCase(id);
